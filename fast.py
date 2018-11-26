@@ -305,18 +305,30 @@ def in_order(nodes, edges):
             edges_.append(((d[e[0][0]], d[e[0][1]]), e[1]))
         return (nodes_, edges_)
 
-
+import numpy as np
 if __name__ == '__main__':
     path = "simplified.txt"
     pyl = PyLouvain.from_file(path)
     partion,q = pyl.apply_method()
-    for p in partion:
-        print(p)
+    dic_cluster = {}
+    cluster=[]
+    for i,p in enumerate(partion):
+        print(i,p)
+        for person in p:
+            dic_cluster[person] = i
     print("community number:"+str(partion.__len__())+" modularity:"+str(q))
 
-    #g = Graph()
-    g=Graph.Read_Ncol(path)
-    # g.add_vertices((0,1,2))
-    layout = g.layout("kk")
-    # g.add_edges([(0, 1), (1, 2)])
-    plot(g, layout=layout,bbox=(3000,3000))
+    for i in range(718):
+        cluster.append(dic_cluster[i])
+    g = Graph()
+    g.add_vertices(pyl.nodes)
+    g.add_edges(np.asarray(pyl.edges)[:,0])
+    g.write_ncol("test.txt")
+    louvian = VertexClustering(g, membership=cluster)
+    #fruchterman_reingold,graphopt,kk,auto
+    layout = g.layout("fruchterman_reingold")
+    testplot=Plot(bbox=(3000,3000))
+    testplot.add(g,layout=layout,bbox=(3000,3000))
+    testplot.add(louvian,layout=layout,bbox=(3000,3000))
+    testplot.show()
+    #testplot.save('a.png')
