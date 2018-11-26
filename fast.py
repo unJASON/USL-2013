@@ -7,6 +7,7 @@
     Ouput: a (partition, modularity) pair where modularity is maximum
 '''
 from igraph import *
+import pickle
 class PyLouvain:
 
     '''
@@ -126,11 +127,13 @@ class PyLouvain:
                 self.actual_partition = actual
             else:
                 self.actual_partition = partition
+            print(q)
             if q == best_q: # 如果本轮迭代modularity没有改变，则认为收敛，停止
                 break
             network = self.second_phase(network, partition)
             best_partition = partition
             best_q = q
+
         return (self.actual_partition, best_q)
 
     '''
@@ -328,8 +331,18 @@ if __name__ == '__main__':
     g = Graph()
     g.add_vertices(pyl.nodes)
     g.add_edges(np.asarray(pyl.edges)[:,0])
+    for i in g.vs:
+        print(i["name"])
     g.write_ncol("test.txt")
+    g.write_pickle("serlize")
     louvian = VertexClustering(g, membership=cluster)
+    with open('fastUVertexClustering.pk', 'wb') as f:
+        f.write(pickle.dumps(louvian))
+
+
+    print(louvian.q)
+    print(Graph.modularity(g, louvian.membership))
+
     #fruchterman_reingold,graphopt,kk,auto
     layout = g.layout("fruchterman_reingold")
     testplot=Plot(bbox=(3000,3000))
