@@ -175,8 +175,11 @@ class PyLouvain:
                         continue
                     if e[0][0] == node and self.communities[e[0][1]] == node_community or e[0][1] == node and self.communities[e[0][0]] == node_community:
                         best_shared_links += e[1]
+                #重新计算线内部权重以及节点自身循环的权
                 self.s_in[node_community] -= 2 * (best_shared_links + self.w[node])
+                #重新计算社区节点权重和
                 self.s_tot[node_community] -= self.k_i[node]
+                #标记当前节点的社区
                 self.communities[node] = -1
                 communities = {} # only consider neighbors of different communities
                 for neighbor in self.get_neighbors(node):
@@ -199,7 +202,9 @@ class PyLouvain:
                 # insert _node into the community maximizing the modularity gain
                 best_partition[best_community].append(node)
                 self.communities[node] = best_community
+                # 加入社区后需要加入该点的连接以及节点自身循环的权重(in)
                 self.s_in[best_community] += 2 * (best_shared_links + self.w[node])
+                # 加入社区后需要加入节点权重(tot)
                 self.s_tot[best_community] += self.k_i[node]
                 if node_community != best_community:
                     improvement = 1
